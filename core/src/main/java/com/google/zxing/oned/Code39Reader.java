@@ -165,14 +165,14 @@ public final class Code39Reader extends OneDReader {
       resultString = result.toString();
     }
 
-    float left = (float) (start[1] + start[0]) / 2.0f;
+    float left = (start[1] + start[0]) / 2.0f;
     float right = lastStart + lastPatternSize / 2.0f;
     return new Result(
         resultString,
         null,
         new ResultPoint[]{
-            new ResultPoint(left, (float) rowNumber),
-            new ResultPoint(right, (float) rowNumber)},
+            new ResultPoint(left, rowNumber),
+            new ResultPoint(right, rowNumber)},
         BarcodeFormat.CODE_39);
 
   }
@@ -187,7 +187,7 @@ public final class Code39Reader extends OneDReader {
     int patternLength = counters.length;
 
     for (int i = rowOffset; i < width; i++) {
-      if (row.get(i) ^ isWhite) {
+      if (row.get(i) != isWhite) {
         counters[counterPosition]++;
       } else {
         if (counterPosition == patternLength - 1) {
@@ -197,9 +197,9 @@ public final class Code39Reader extends OneDReader {
             return new int[]{patternStart, i};
           }
           patternStart += counters[0] + counters[1];
-          System.arraycopy(counters, 2, counters, 0, patternLength - 2);
-          counters[patternLength - 2] = 0;
-          counters[patternLength - 1] = 0;
+          System.arraycopy(counters, 2, counters, 0, counterPosition - 1);
+          counters[counterPosition - 1] = 0;
+          counters[counterPosition] = 0;
           counterPosition--;
         } else {
           counterPosition++;
