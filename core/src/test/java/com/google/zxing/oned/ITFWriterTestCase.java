@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 ZXing authors
+ * Copyright 2017 ZXing authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,29 +23,18 @@ import com.google.zxing.common.BitMatrixTestCase;
 import org.junit.Assert;
 import org.junit.Test;
 
-public final class UPCEWriterTestCase extends Assert {
+public final class ITFWriterTestCase extends Assert {
 
   @Test
   public void testEncode() throws WriterException {
-    doTest("05096893",
-           "0000000000010101110010100111000101101011110110111001011101010100000000000");
+    doTest("00123456789012",
+           "0000010101010111000111000101110100010101110001110111010001010001110100011" +
+           "100010101000101011100011101011101000111000101110100010101110001110100000");
   }
 
-  @Test
-  public void testEncodeSystem1() throws WriterException {
-    doTest("12345670",
-           "0000000000010100100110111101010001101110010000101001000101010100000000000");
-  }
-
-  @Test
-  public void testAddChecksumAndEncode() throws WriterException {
-    doTest("0509689",
-           "0000000000010101110010100111000101101011110110111001011101010100000000000");
-  }
-
-  private static void doTest(String content, String encoding) throws WriterException {
-    BitMatrix result = new UPCEWriter().encode(content, BarcodeFormat.UPC_E, encoding.length(), 0);
-    assertEquals(encoding, BitMatrixTestCase.matrixToString(result));
+  private static void doTest(String input, CharSequence expected) throws WriterException {
+    BitMatrix result = new ITFWriter().encode(input, BarcodeFormat.ITF, 0, 0);
+    assertEquals(expected, BitMatrixTestCase.matrixToString(result));
   }
 
 }
