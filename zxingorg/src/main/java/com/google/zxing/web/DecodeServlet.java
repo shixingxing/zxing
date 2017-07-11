@@ -63,6 +63,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -161,12 +162,21 @@ public final class DecodeServlet extends HttpServlet {
     
     // Shortcut for data URI
     if ("data".equals(imageURI.getScheme())) {
+      BufferedImage image = null;
       try {
-        BufferedImage image = ImageReader.readDataURIImage(imageURI);
-        processImage(image, request, response);
-      } catch (IOException ioe) {
-        log.info(ioe.toString());
+        image = ImageReader.readDataURIImage(imageURI);
+      } catch (IOException | IllegalStateException e) {
+        log.info(e.toString());
         errorResponse(request, response, "badurl");
+      }
+      if (image == null) {
+        errorResponse(request, response, "badimage");
+        return;
+      }
+      try {
+        processImage(image, request, response);
+      } finally {
+        image.flush();
       }
       return;
     }
@@ -303,14 +313,19 @@ public final class DecodeServlet extends HttpServlet {
       errorResponse(request, response, "badimage");
       return;
     }
-    if (image.getHeight() <= 1 || image.getWidth() <= 1 ||
-        image.getHeight() * image.getWidth() > MAX_PIXELS) {
-      log.info("Dimensions out of bounds: " + image.getWidth() + 'x' + image.getHeight());
-      errorResponse(request, response, "badimage");
-      return;
+    try {
+      int height = image.getHeight();
+      int width = image.getWidth();
+      if (height <= 1 || width <= 1 || height * width > MAX_PIXELS) {
+        log.info("Dimensions out of bounds: " + width + 'x' + height);
+        errorResponse(request, response, "badimage");
+        return;
+      }
+
+      processImage(image, request, response);
+    } finally {
+      image.flush();
     }
-    
-    processImage(image, request, response);
   }
   
   private static void processImage(BufferedImage image,
@@ -421,7 +436,12 @@ public final class DecodeServlet extends HttpServlet {
     String text = bundle.getString("response.error." + key + ".text");
     request.setAttribute("title", title);
     request.setAttribute("text", text);
-    request.getRequestDispatcher("response.jspx").forward(request, response);
+    RequestDispatcher dispatcher = request.getRequestDispatcher("response.jspx");
+    if (dispatcher == null) {
+      log.warning("Can't obtain RequestDispatcher");
+    } else {
+      dispatcher.forward(request, response);
+    }
   }
 
 }
