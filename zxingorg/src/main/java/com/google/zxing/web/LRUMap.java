@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 ZXing authors
+ * Copyright 2017 ZXing authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,29 +14,29 @@
  * limitations under the License.
  */
 
-package com.google.zxing.client.android.wifi;
+package com.google.zxing.web;
 
-enum NetworkType {
+import java.util.LinkedHashMap;
+import java.util.Map;
 
-  WEP,
-  WPA,
-  NO_PASSWORD;
+/**
+ * Map with maximum size that removes least-recently-accessed entries when full.
+ *
+ * @param <K> map key type
+ * @param <V> map value type
+ */
+final class LRUMap<K,V> extends LinkedHashMap<K,V> {
 
-  static NetworkType forIntentValue(String networkTypeString) {
-    if (networkTypeString == null) {
-      return NO_PASSWORD;
-    }
-    switch (networkTypeString) {
-      case "WPA":
-      case "WPA2":
-        return WPA;
-      case "WEP":
-        return WEP;
-      case "nopass":
-        return NO_PASSWORD;
-      default:
-        throw new IllegalArgumentException(networkTypeString);
-    }
+  private final int maxSize;
+
+  LRUMap(int maxSize) {
+    super(100, 0.75f, true);
+    this.maxSize = maxSize;
+  }
+
+  @Override
+  protected boolean removeEldestEntry(Map.Entry<K,V> eldest) {
+    return size() > maxSize;
   }
 
 }

@@ -20,7 +20,8 @@ import com.google.zxing.Result;
 
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -125,6 +126,7 @@ public final class VCardResultParser extends ResultParser {
       List<String> metadata = null;
       boolean quotedPrintable = false;
       String quotedPrintableCharset = null;
+      String valueType = null;
       if (metadataString != null) {
         for (String metadatum : SEMICOLON.split(metadataString)) {
           if (metadata == null) {
@@ -139,6 +141,8 @@ public final class VCardResultParser extends ResultParser {
               quotedPrintable = true;
             } else if ("CHARSET".equalsIgnoreCase(key)) {
               quotedPrintableCharset = value;
+            } else if ("VALUE".equalsIgnoreCase(key)) {
+              valueType = value;
             }
           }
         }
@@ -187,6 +191,12 @@ public final class VCardResultParser extends ResultParser {
           element = CR_LF_SPACE_TAB.matcher(element).replaceAll("");
           element = NEWLINE_ESCAPE.matcher(element).replaceAll("\n");
           element = VCARD_ESCAPES.matcher(element).replaceAll("$1");
+        }
+        // Only handle VALUE=uri specially
+        if ("uri".equals(valueType)) {
+          // Don't actually support dereferencing URIs, but use scheme-specific part not URI
+          // as value, to support tel: and mailto:
+          element = URI.create(element).getSchemeSpecificPart();
         }
         if (metadata == null) {
           List<String> match = new ArrayList<>(1);
@@ -246,12 +256,12 @@ public final class VCardResultParser extends ResultParser {
       byte[] fragmentBytes = fragmentBuffer.toByteArray();
       String fragment;
       if (charset == null) {
-        fragment = new String(fragmentBytes, Charset.forName("UTF-8"));
+        fragment = new String(fragmentBytes, StandardCharsets.UTF_8);
       } else {
         try {
           fragment = new String(fragmentBytes, charset);
         } catch (UnsupportedEncodingException e) {
-          fragment = new String(fragmentBytes, Charset.forName("UTF-8"));
+          fragment = new String(fragmentBytes, StandardCharsets.UTF_8);
         }
       }
       fragmentBuffer.reset();
