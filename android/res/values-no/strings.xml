@@ -12,7 +12,7 @@
  limitations under the License.
  -->
 <resources>
-  <string name="app_name">Barcode Scanner+</string>
+  <string name="app_name">Barcode Scanner</string>
   <string name="app_picker_name">Applikasjoner</string>
   <string name="bookmark_picker_name">Bokmerker</string>
   <string name="button_add_calendar">Legg til i kalender</string>
@@ -118,7 +118,6 @@
   <string name="preferences_remember_duplicates_title">Husk duplikater</string>
   <string name="preferences_orientation_title">Ingen automatisk rotasjon.</string>
   <string name="preferences_result_title">Resultatinnstillinger</string>
-  <string name="preferences_scan_title">Skanningsinnstillinger</string>
   <string name="preferences_scanning_title">Mens strekkoder skannes, les\u2026</string>
   <string name="preferences_search_country">Søk etter land</string>
   <string name="preferences_supplemental_summary">Prøv å hente mer informasjon om strekkodens innhold</string>
