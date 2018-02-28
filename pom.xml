@@ -19,7 +19,7 @@
 
   <groupId>com.google.zxing</groupId>
   <artifactId>zxing-parent</artifactId>
-  <version>3.3.2-SNAPSHOT</version>
+  <version>3.3.3-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <dependencyManagement>
@@ -86,7 +86,7 @@
     <proguard.plugin.version>2.0.14</proguard.plugin.version>
     <slf4j.version>1.7.25</slf4j.version>
     <!-- This can't reference project.version as some subprojects version differently -->
-    <zxing.version>3.3.2-SNAPSHOT</zxing.version>
+    <zxing.version>3.3.3-SNAPSHOT</zxing.version>
     <android.platform>22</android.platform>
   </properties>
 
@@ -116,10 +116,6 @@
       <plugin>
         <groupId>org.apache.rat</groupId>
         <artifactId>apache-rat-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-checkstyle-plugin</artifactId>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -183,7 +179,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-javadoc-plugin</artifactId>
-          <version>3.0.0-M1</version>
+          <version>3.0.0</version>
           <configuration>
             <javadocVersion>${java.version}</javadocVersion>
             <quiet>true</quiet>
@@ -426,7 +422,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-site-plugin</artifactId>
-          <version>3.6</version>
+          <version>3.7</version>
           <inherited>false</inherited>
         </plugin>
         <plugin>
@@ -442,7 +438,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-checkstyle-plugin</artifactId>
-          <version>2.17</version>
+          <version>3.0.0</version>
           <configuration>
             <configLocation>src/checkstyle/checkstyle.xml</configLocation>
             <!-- Android generated files -->
@@ -461,7 +457,7 @@
             <dependency>
               <groupId>com.puppycrawl.tools</groupId>
               <artifactId>checkstyle</artifactId>
-              <version>6.19</version>
+              <version>8.8</version>
             </dependency>
           </dependencies>
         </plugin>
@@ -521,7 +517,7 @@
         <plugin>
           <groupId>org.jacoco</groupId>
           <artifactId>jacoco-maven-plugin</artifactId>
-          <version>0.7.9</version>
+          <version>0.8.0</version>
           <executions>
             <execution>
               <goals>
@@ -823,6 +819,20 @@
       <modules>
          <module>zxing.appspot.com</module>
       </modules>
+    </profile>
+    <profile>
+      <id>checkstyle</id>
+      <activation>
+        <jdk>[1.8,)</jdk> <!-- won't work with JDK 7 -->
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-checkstyle-plugin</artifactId>
+          </plugin>
+        </plugins>
+      </build>
     </profile>
   </profiles>
 
