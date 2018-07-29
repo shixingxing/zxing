@@ -23,6 +23,9 @@ import com.google.zxing.common.BitMatrixTestCase;
 import org.junit.Assert;
 import org.junit.Test;
 
+/**
+ * Tests {@link ITFWriter}.
+ */
 public final class ITFWriterTestCase extends Assert {
 
   @Test
@@ -35,6 +38,11 @@ public final class ITFWriterTestCase extends Assert {
   private static void doTest(String input, CharSequence expected) throws WriterException {
     BitMatrix result = new ITFWriter().encode(input, BarcodeFormat.ITF, 0, 0);
     assertEquals(expected, BitMatrixTestCase.matrixToString(result));
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testEncodeIllegalCharacters() throws WriterException {
+    new ITFWriter().encode("00123456789abc", BarcodeFormat.ITF, 0, 0);
   }
 
 }
