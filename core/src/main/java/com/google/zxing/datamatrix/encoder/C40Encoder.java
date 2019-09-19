@@ -42,11 +42,10 @@ class C40Encoder implements Encoder {
       if (!context.hasMoreCharacters()) {
         //Avoid having a single C40 value in the last triplet
         StringBuilder removed = new StringBuilder();
-        if ((buffer.length() % 3) == 2 && (available < 2 || available > 2)) {
+        if ((buffer.length() % 3) == 2 && available != 2) {
           lastCharSize = backtrackOneCharacter(context, buffer, removed, lastCharSize);
         }
-        while ((buffer.length() % 3) == 1
-            && ((lastCharSize <= 3 && available != 1) || lastCharSize > 3)) {
+        while ((buffer.length() % 3) == 1 && (lastCharSize > 3 || available != 1)) {
           lastCharSize = backtrackOneCharacter(context, buffer, removed, lastCharSize);
         }
         break;
@@ -143,22 +142,22 @@ class C40Encoder implements Encoder {
       sb.append(c);
       return 2;
     }
-    if (c >= '!' && c <= '/') {
+    if (c <= '/') {
       sb.append('\1'); //Shift 2 Set
       sb.append((char) (c - 33));
       return 2;
     }
-    if (c >= ':' && c <= '@') {
+    if (c <= '@') {
       sb.append('\1'); //Shift 2 Set
       sb.append((char) (c - 58 + 15));
       return 2;
     }
-    if (c >= '[' && c <= '_') {
+    if (c <= '_') {
       sb.append('\1'); //Shift 2 Set
       sb.append((char) (c - 91 + 22));
       return 2;
     }
-    if (c >= '`' && c <= 127) {
+    if (c <= 127) {
       sb.append('\2'); //Shift 3 Set
       sb.append((char) (c - 96));
       return 2;

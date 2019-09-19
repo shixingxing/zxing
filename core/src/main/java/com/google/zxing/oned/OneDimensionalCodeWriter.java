@@ -22,6 +22,7 @@ import com.google.zxing.Writer;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -51,7 +52,7 @@ public abstract class OneDimensionalCodeWriter implements Writer {
                           BarcodeFormat format,
                           int width,
                           int height,
-                          Map<EncodeHintType,?> hints) throws WriterException {
+                          Map<EncodeHintType,?> hints) {
     if (contents.isEmpty()) {
       throw new IllegalArgumentException("Found empty contents");
     }
@@ -59,6 +60,11 @@ public abstract class OneDimensionalCodeWriter implements Writer {
     if (width < 0 || height < 0) {
       throw new IllegalArgumentException("Negative size is not allowed. Input: "
                                              + width + 'x' + height);
+    }
+    Collection<BarcodeFormat> supportedFormats = getSupportedWriteFormats();
+    if (supportedFormats != null && !supportedFormats.contains(format)) {
+      throw new IllegalArgumentException("Can only encode " + supportedFormats +
+        ", but got " + format);
     }
 
     int sidesMargin = getDefaultMargin();
@@ -68,6 +74,10 @@ public abstract class OneDimensionalCodeWriter implements Writer {
 
     boolean[] code = encode(contents);
     return renderResult(code, width, height, sidesMargin);
+  }
+
+  protected Collection<BarcodeFormat> getSupportedWriteFormats() {
+    return null;
   }
 
   /**
@@ -93,9 +103,10 @@ public abstract class OneDimensionalCodeWriter implements Writer {
   }
 
   /**
-   * Throw IllegalArgumentException if input contains characters other than digits 0-9.
+   * @param contents string to check for numeric characters
+   * @throws IllegalArgumentException if input contains characters other than digits 0-9.
    */
-  protected static final void checkNumeric(String contents) throws IllegalArgumentException {
+  protected static void checkNumeric(String contents) {
     if (!NUMERIC.matcher(contents).matches()) {
       throw new IllegalArgumentException("Input should only contain digits 0-9");
     }

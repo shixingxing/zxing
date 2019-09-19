@@ -164,6 +164,7 @@ final class DecodedBitStreamParser {
     return decoderResult;
   }
 
+  @SuppressWarnings("deprecation")
   static int decodeMacroBlock(int[] codewords, int codeIndex, PDF417ResultMetadata resultMetadata)
       throws FormatException {
     if (codeIndex + NUMBER_OF_SEQUENCE_CODEWORDS > codewords[0]) {
@@ -421,6 +422,7 @@ final class DecodedBitStreamParser {
                 subMode = Mode.LOWER;
                 break;
               case AL:
+              case TEXT_COMPACTION_MODE_LATCH:
                 subMode = Mode.ALPHA;
                 break;
               case PS:
@@ -430,9 +432,6 @@ final class DecodedBitStreamParser {
                 break;
               case MODE_SHIFT_TO_BYTE_COMPACTION_MODE:
                 result.append((char) byteCompactionData[i]);
-                break;
-              case TEXT_COMPACTION_MODE_LATCH:
-                subMode = Mode.ALPHA;
                 break;
             }
           }
@@ -445,13 +444,11 @@ final class DecodedBitStreamParser {
           } else {
             switch (subModeCh) {
               case PAL:
+              case TEXT_COMPACTION_MODE_LATCH:
                 subMode = Mode.ALPHA;
                 break;
               case MODE_SHIFT_TO_BYTE_COMPACTION_MODE:
                 result.append((char) byteCompactionData[i]);
-                break;
-              case TEXT_COMPACTION_MODE_LATCH:
-                subMode = Mode.ALPHA;
                 break;
             }
           }
@@ -482,15 +479,13 @@ final class DecodedBitStreamParser {
           } else {
             switch (subModeCh) {
               case PAL:
+              case TEXT_COMPACTION_MODE_LATCH:
                 subMode = Mode.ALPHA;
                 break;
               case MODE_SHIFT_TO_BYTE_COMPACTION_MODE:
                 // PS before Shift-to-Byte is used as a padding character,
                 // see 5.4.2.4 of the specification
                 result.append((char) byteCompactionData[i]);
-                break;
-              case TEXT_COMPACTION_MODE_LATCH:
-                subMode = Mode.ALPHA;
                 break;
             }
           }

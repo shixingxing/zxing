@@ -25,6 +25,7 @@ import com.google.zxing.ResultPointCallback;
 import com.google.zxing.common.BitArray;
 import com.google.zxing.common.detector.MathUtils;
 
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -164,7 +165,8 @@ public final class RSS14Reader extends AbstractRSSReader {
         (ResultPointCallback) hints.get(DecodeHintType.NEED_RESULT_POINT_CALLBACK);
 
       if (resultPointCallback != null) {
-        float center = (startEnd[0] + startEnd[1]) / 2.0f;
+        startEnd = pattern.getStartEnd();
+        float center = (startEnd[0] + startEnd[1] - 1) / 2.0f;
         if (right) {
           // row is actually reversed
           center = row.getSize() - 1 - center;
@@ -186,14 +188,12 @@ public final class RSS14Reader extends AbstractRSSReader {
       throws NotFoundException {
 
     int[] counters = getDataCharacterCounters();
-    for (int x = 0; x < counters.length; x++) {
-      counters[x] = 0;
-    }
+    Arrays.fill(counters, 0);
 
     if (outsideChar) {
       recordPatternInReverse(row, pattern.getStartEnd()[0], counters);
     } else {
-      recordPattern(row, pattern.getStartEnd()[1] + 1, counters);
+      recordPattern(row, pattern.getStartEnd()[1], counters);
       // reverse it
       for (int i = 0, j = counters.length - 1; i < j; i++, j--) {
         int temp = counters[i];
@@ -397,51 +397,56 @@ public final class RSS14Reader extends AbstractRSSReader {
       }
       incrementOdd = true;
       incrementEven = true;
-    } else */ if (mismatch == 1) {
-      if (oddParityBad) {
-        if (evenParityBad) {
-          throw NotFoundException.getNotFoundInstance();
-        }
-        decrementOdd = true;
-      } else {
-        if (!evenParityBad) {
-          throw NotFoundException.getNotFoundInstance();
-        }
-        decrementEven = true;
-      }
-    } else if (mismatch == -1) {
-      if (oddParityBad) {
-        if (evenParityBad) {
-          throw NotFoundException.getNotFoundInstance();
-        }
-        incrementOdd = true;
-      } else {
-        if (!evenParityBad) {
-          throw NotFoundException.getNotFoundInstance();
-        }
-        incrementEven = true;
-      }
-    } else if (mismatch == 0) {
-      if (oddParityBad) {
-        if (!evenParityBad) {
-          throw NotFoundException.getNotFoundInstance();
-        }
-        // Both bad
-        if (oddSum < evenSum) {
-          incrementOdd = true;
-          decrementEven = true;
-        } else {
+    } else */
+    switch (mismatch) {
+      case 1:
+        if (oddParityBad) {
+          if (evenParityBad) {
+            throw NotFoundException.getNotFoundInstance();
+          }
           decrementOdd = true;
+        } else {
+          if (!evenParityBad) {
+            throw NotFoundException.getNotFoundInstance();
+          }
+          decrementEven = true;
+        }
+        break;
+      case -1:
+        if (oddParityBad) {
+          if (evenParityBad) {
+            throw NotFoundException.getNotFoundInstance();
+          }
+          incrementOdd = true;
+        } else {
+          if (!evenParityBad) {
+            throw NotFoundException.getNotFoundInstance();
+          }
           incrementEven = true;
         }
-      } else {
-        if (evenParityBad) {
-          throw NotFoundException.getNotFoundInstance();
+        break;
+      case 0:
+        if (oddParityBad) {
+          if (!evenParityBad) {
+            throw NotFoundException.getNotFoundInstance();
+          }
+          // Both bad
+          if (oddSum < evenSum) {
+            incrementOdd = true;
+            decrementEven = true;
+          } else {
+            decrementOdd = true;
+            incrementEven = true;
+          }
+        } else {
+          if (evenParityBad) {
+            throw NotFoundException.getNotFoundInstance();
+          }
+          // Nothing to do!
         }
-        // Nothing to do!
-      }
-    } else {
-      throw NotFoundException.getNotFoundInstance();
+        break;
+      default:
+        throw NotFoundException.getNotFoundInstance();
     }
 
     if (incrementOdd) {
