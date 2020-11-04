@@ -18,7 +18,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>core</artifactId>
-  <version>3.4.1-SNAPSHOT</version>
+  <version>3.4.2-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <dependencies>
@@ -32,7 +32,7 @@
   <parent>
     <groupId>com.google.zxing</groupId>
     <artifactId>zxing-parent</artifactId>
-    <version>3.4.1-SNAPSHOT</version>
+    <version>3.4.2-SNAPSHOT</version>
   </parent>
 
   <name>ZXing Core</name>
@@ -41,9 +41,6 @@
   <profiles>
     <profile>
       <id>proguard-library</id>
-      <activation>
-        <jdk>[,9)</jdk> <!-- Proguard won't work with JDK 9 -->
-      </activation>
       <build>
         <plugins>
           <plugin>
@@ -66,7 +63,7 @@
       <plugin>
         <groupId>biz.aQute.bnd</groupId>
         <artifactId>bnd-maven-plugin</artifactId>
-        <version>5.0.1</version>
+        <version>5.1.2</version>
         <executions>
           <execution>
             <goals>
