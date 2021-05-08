@@ -20,6 +20,7 @@ import com.google.zxing.BarcodeFormat;
 import com.google.zxing.DecodeHintType;
 import com.google.zxing.NotFoundException;
 import com.google.zxing.Result;
+import com.google.zxing.ResultMetadataType;
 import com.google.zxing.ResultPoint;
 import com.google.zxing.ResultPointCallback;
 import com.google.zxing.common.BitArray;
@@ -131,19 +132,16 @@ public final class RSS14Reader extends AbstractRSSReader {
 
     ResultPoint[] leftPoints = leftPair.getFinderPattern().getResultPoints();
     ResultPoint[] rightPoints = rightPair.getFinderPattern().getResultPoints();
-    return new Result(
+    Result result = new Result(
         buffer.toString(),
         null,
         new ResultPoint[] { leftPoints[0], leftPoints[1], rightPoints[0], rightPoints[1], },
         BarcodeFormat.RSS_14);
+    result.putMetadata(ResultMetadataType.SYMBOLOGY_IDENTIFIER, "]e0");
+    return result;
   }
 
   private static boolean checkChecksum(Pair leftPair, Pair rightPair) {
-    //int leftFPValue = leftPair.getFinderPattern().getValue();
-    //int rightFPValue = rightPair.getFinderPattern().getValue();
-    //if ((leftFPValue == 0 && rightFPValue == 8) ||
-    //    (leftFPValue == 8 && rightFPValue == 0)) {
-    //}
     int checkValue = (leftPair.getChecksumPortion() + 16 * rightPair.getChecksumPortion()) % 79;
     int targetCheckValue =
         9 * leftPair.getFinderPattern().getValue() + rightPair.getFinderPattern().getValue();

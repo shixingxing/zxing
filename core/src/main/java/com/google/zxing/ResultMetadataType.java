@@ -94,4 +94,9 @@ public enum ResultMetadataType {
    */
   STRUCTURED_APPEND_PARITY,
 
+  /**
+   * Barcode Symbology Identifier.
+   * Note: According to the GS1 specification the identifer may have to replace a leading FNC1/GS character when prepending to the barcode content.
+   */
+  SYMBOLOGY_IDENTIFIER,
 }

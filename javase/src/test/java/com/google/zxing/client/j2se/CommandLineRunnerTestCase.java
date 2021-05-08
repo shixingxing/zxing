@@ -26,7 +26,8 @@ public final class CommandLineRunnerTestCase extends Assert {
 
   @Test
   public void testCommandLineRunner() throws Exception {
-    String[] args = { "--pure_barcode", DecodeWorkerTestCase.IMAGE_DATA_URI };
+    String[] args = { "--pure_barcode", "--try_harder",
+      DecodeWorkerTestCase.IMAGE_DATA_URI, DecodeWorkerTestCase.IMAGE_NOBARCODE_DATA_URI };
     // Not a lot to do here but make sure it runs
     CommandLineRunner.main(args);
   }

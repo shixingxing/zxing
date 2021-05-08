@@ -19,13 +19,22 @@ package com.google.zxing.common;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.nio.charset.StandardCharsets;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.Random;
 
 /**
  * Tests {@link StringUtils}.
  */
 public final class StringUtilsTestCase extends Assert {
+
+  @Test
+  public void testRandom() {
+    Random r = new Random(1234L);
+    byte[] bytes = new byte[1000];
+    r.nextBytes(bytes);
+    assertEquals(Charset.defaultCharset(), StringUtils.guessCharset(bytes, null));
+  }
 
   @Test
   public void testShortShiftJIS1() {
@@ -55,6 +64,22 @@ public final class StringUtilsTestCase extends Assert {
            StringUtils.SHIFT_JIS_CHARSET, "SJIS");
   }
 
+  @Test
+  public void testUTF16BE() {
+    // 调压柜
+    doTest(new byte[] { (byte) 0xFE, (byte) 0xFF, (byte) 0x8c, (byte) 0x03, (byte) 0x53, (byte) 0x8b,
+                        (byte) 0x67, (byte) 0xdc, },
+      StandardCharsets.UTF_16, StandardCharsets.UTF_16.name());
+  }
+
+  @Test
+  public void testUTF16LE() {
+    // 调压柜
+    doTest(new byte[] { (byte) 0xFF, (byte) 0xFE, (byte) 0x03, (byte) 0x8c, (byte) 0x8b, (byte) 0x53,
+                        (byte) 0xdc, (byte) 0x67, },
+      StandardCharsets.UTF_16, StandardCharsets.UTF_16.name());
+  }
+
   private static void doTest(byte[] bytes, Charset charset, String encoding) {
     Charset guessedCharset = StringUtils.guessCharset(bytes, null);
     String guessedEncoding = StringUtils.guessEncoding(bytes, null);
@@ -76,7 +101,11 @@ public final class StringUtilsTestCase extends Assert {
     declaration.append("new byte[] { ");
     for (byte b : text.getBytes(charset)) {
       declaration.append("(byte) 0x");
-      declaration.append(Integer.toHexString(b & 0xFF));
+      int value = b & 0xFF;
+      if (value < 0x10) {
+        declaration.append('0');
+      }
+      declaration.append(Integer.toHexString(value));
       declaration.append(", ");
     }
     declaration.append('}');
