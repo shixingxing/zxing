@@ -193,6 +193,26 @@ public final class HighLevelEncoder {
   }
 
   static int lookAheadTest(CharSequence msg, int startpos, int currentMode) {
+    int newMode = lookAheadTestIntern(msg, startpos, currentMode);
+    if (currentMode == X12_ENCODATION && newMode == X12_ENCODATION) {
+      int endpos = Math.min(startpos + 3, msg.length());
+      for (int i = startpos; i < endpos; i++) {
+        if (!isNativeX12(msg.charAt(i))) {
+          return ASCII_ENCODATION;
+        }
+      }
+    } else if (currentMode == EDIFACT_ENCODATION && newMode == EDIFACT_ENCODATION) {
+      int endpos = Math.min(startpos + 4, msg.length());
+      for (int i = startpos; i < endpos; i++) {
+        if (!isNativeEDIFACT(msg.charAt(i))) {
+          return ASCII_ENCODATION;
+        }
+      }
+    }
+    return newMode;
+  }
+
+  static int lookAheadTestIntern(CharSequence msg, int startpos, int currentMode) {
     if (startpos >= msg.length()) {
       return currentMode;
     }
@@ -295,32 +315,34 @@ public final class HighLevelEncoder {
         int[] intCharCounts = new int[6];
         byte[] mins = new byte[6];
         findMinimums(charCounts, intCharCounts, Integer.MAX_VALUE, mins);
-        int minCount = getMinimumCount(mins);
 
-        if (intCharCounts[ASCII_ENCODATION] < intCharCounts[BASE256_ENCODATION]
-            && intCharCounts[ASCII_ENCODATION] < intCharCounts[C40_ENCODATION]
-            && intCharCounts[ASCII_ENCODATION] < intCharCounts[TEXT_ENCODATION]
-            && intCharCounts[ASCII_ENCODATION] < intCharCounts[X12_ENCODATION]
-            && intCharCounts[ASCII_ENCODATION] < intCharCounts[EDIFACT_ENCODATION]) {
+        if (intCharCounts[ASCII_ENCODATION] < min(intCharCounts[BASE256_ENCODATION],
+              intCharCounts[C40_ENCODATION], intCharCounts[TEXT_ENCODATION], intCharCounts[X12_ENCODATION],
+              intCharCounts[EDIFACT_ENCODATION])) {
           return ASCII_ENCODATION;
         }
-        if (intCharCounts[BASE256_ENCODATION] < intCharCounts[ASCII_ENCODATION]
-            || (mins[C40_ENCODATION] + mins[TEXT_ENCODATION] + mins[X12_ENCODATION] + mins[EDIFACT_ENCODATION]) == 0) {
+        if (intCharCounts[BASE256_ENCODATION] < intCharCounts[ASCII_ENCODATION] ||
+              intCharCounts[BASE256_ENCODATION] + 1 < min(intCharCounts[C40_ENCODATION],
+              intCharCounts[TEXT_ENCODATION], intCharCounts[X12_ENCODATION], intCharCounts[EDIFACT_ENCODATION])) {
           return BASE256_ENCODATION;
         }
-        if (minCount == 1 && mins[EDIFACT_ENCODATION] > 0) {
+        if (intCharCounts[EDIFACT_ENCODATION] + 1 < min(intCharCounts[BASE256_ENCODATION],
+              intCharCounts[C40_ENCODATION] , intCharCounts[TEXT_ENCODATION] , intCharCounts[X12_ENCODATION],
+              intCharCounts[ASCII_ENCODATION])) {
           return EDIFACT_ENCODATION;
         }
-        if (minCount == 1 && mins[TEXT_ENCODATION] > 0) {
+        if (intCharCounts[TEXT_ENCODATION] + 1 < min(intCharCounts[BASE256_ENCODATION],
+              intCharCounts[C40_ENCODATION] , intCharCounts[EDIFACT_ENCODATION] , intCharCounts[X12_ENCODATION],
+              intCharCounts[ASCII_ENCODATION])) {
           return TEXT_ENCODATION;
         }
-        if (minCount == 1 && mins[X12_ENCODATION] > 0) {
+        if (intCharCounts[X12_ENCODATION] + 1 < min(intCharCounts[BASE256_ENCODATION],
+              intCharCounts[C40_ENCODATION] , intCharCounts[EDIFACT_ENCODATION] , intCharCounts[TEXT_ENCODATION],
+              intCharCounts[ASCII_ENCODATION])) {
           return X12_ENCODATION;
         }
-        if (intCharCounts[C40_ENCODATION] + 1 < intCharCounts[ASCII_ENCODATION]
-            && intCharCounts[C40_ENCODATION] + 1 < intCharCounts[BASE256_ENCODATION]
-            && intCharCounts[C40_ENCODATION] + 1 < intCharCounts[EDIFACT_ENCODATION]
-            && intCharCounts[C40_ENCODATION] + 1 < intCharCounts[TEXT_ENCODATION]) {
+        if (intCharCounts[C40_ENCODATION] + 1 < min(intCharCounts[ASCII_ENCODATION],
+              intCharCounts[BASE256_ENCODATION] , intCharCounts[EDIFACT_ENCODATION] , intCharCounts[TEXT_ENCODATION])) {
           if (intCharCounts[C40_ENCODATION] < intCharCounts[X12_ENCODATION]) {
             return C40_ENCODATION;
           }
@@ -341,6 +363,14 @@ public final class HighLevelEncoder {
         }
       }
     }
+  }
+
+  private static int min(int f1, int f2, int f3, int f4, int f5) {
+    return Math.min(min(f1, f2, f3, f4),f5);
+  }
+
+  private static int min(int f1, int f2, int f3, int f4) {
+    return Math.min(f1, Math.min(f2, Math.min(f3, f4)));
   }
 
   private static int findMinimums(float[] charCounts, int[] intCharCounts, int min, byte[] mins) {
@@ -410,20 +440,12 @@ public final class HighLevelEncoder {
    * @return the requested character count
    */
   public static int determineConsecutiveDigitCount(CharSequence msg, int startpos) {
-    int count = 0;
     int len = msg.length();
     int idx = startpos;
-    if (idx < len) {
-      char ch = msg.charAt(idx);
-      while (isDigit(ch) && idx < len) {
-        count++;
-        idx++;
-        if (idx < len) {
-          ch = msg.charAt(idx);
-        }
-      }
+    while (idx < len && isDigit(msg.charAt(idx))) {
+      idx++;
     }
-    return count;
+    return idx - startpos;
   }
 
   static void illegalCharacter(char c) {
