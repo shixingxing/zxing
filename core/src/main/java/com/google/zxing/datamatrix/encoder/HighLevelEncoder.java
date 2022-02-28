@@ -91,15 +91,15 @@ public final class HighLevelEncoder {
   /**
    * 05 Macro header
    */
-  private static final String MACRO_05_HEADER = "[)>\u001E05\u001D";
+  static final String MACRO_05_HEADER = "[)>\u001E05\u001D";
   /**
    * 06 Macro header
    */
-  private static final String MACRO_06_HEADER = "[)>\u001E06\u001D";
+  static final String MACRO_06_HEADER = "[)>\u001E06\u001D";
   /**
    * Macro trailer
    */
-  private static final String MACRO_TRAILER = "\u001E\u0004";
+  static final String MACRO_TRAILER = "\u001E\u0004";
 
   static final int ASCII_ENCODATION = 0;
   static final int C40_ENCODATION = 1;
@@ -125,7 +125,7 @@ public final class HighLevelEncoder {
    * @return the encoded message (the char values range from 0 to 255)
    */
   public static String encodeHighLevel(String msg) {
-    return encodeHighLevel(msg, SymbolShapeHint.FORCE_NONE, null, null);
+    return encodeHighLevel(msg, SymbolShapeHint.FORCE_NONE, null, null, false);
   }
 
   /**
@@ -143,9 +143,29 @@ public final class HighLevelEncoder {
                                        SymbolShapeHint shape,
                                        Dimension minSize,
                                        Dimension maxSize) {
+    return encodeHighLevel(msg, shape, minSize, maxSize, false);
+  }
+  /**
+   * Performs message encoding of a DataMatrix message using the algorithm described in annex P
+   * of ISO/IEC 16022:2000(E).
+   *
+   * @param msg     the message
+   * @param shape   requested shape. May be {@code SymbolShapeHint.FORCE_NONE},
+   *                {@code SymbolShapeHint.FORCE_SQUARE} or {@code SymbolShapeHint.FORCE_RECTANGLE}.
+   * @param minSize the minimum symbol size constraint or null for no constraint
+   * @param maxSize the maximum symbol size constraint or null for no constraint
+   * @param forceC40 enforce C40 encoding
+   * @return the encoded message (the char values range from 0 to 255)
+   */
+  public static String encodeHighLevel(String msg,
+                                       SymbolShapeHint shape,
+                                       Dimension minSize,
+                                       Dimension maxSize,
+                                       boolean forceC40) {
     //the codewords 0..255 are encoded as Unicode characters
+    C40Encoder c40Encoder = new C40Encoder();
     Encoder[] encoders = {
-        new ASCIIEncoder(), new C40Encoder(), new TextEncoder(),
+        new ASCIIEncoder(), c40Encoder, new TextEncoder(),
         new X12Encoder(), new EdifactEncoder(),  new Base256Encoder()
     };
 
@@ -164,6 +184,13 @@ public final class HighLevelEncoder {
     }
 
     int encodingMode = ASCII_ENCODATION; //Default mode
+
+    if (forceC40) {
+      c40Encoder.encodeMaximal(context);
+      encodingMode = context.getNewEncoding();
+      context.resetEncoderSignal();
+    }
+
     while (context.hasMoreCharacters()) {
       encoders[encodingMode].encode(context);
       if (context.getNewEncoding() >= 0) {
@@ -406,15 +433,15 @@ public final class HighLevelEncoder {
     return ch >= 128 && ch <= 255;
   }
 
-  private static boolean isNativeC40(char ch) {
+  static boolean isNativeC40(char ch) {
     return (ch == ' ') || (ch >= '0' && ch <= '9') || (ch >= 'A' && ch <= 'Z');
   }
 
-  private static boolean isNativeText(char ch) {
+  static boolean isNativeText(char ch) {
     return (ch == ' ') || (ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'z');
   }
 
-  private static boolean isNativeX12(char ch) {
+  static boolean isNativeX12(char ch) {
     return isX12TermSep(ch) || (ch == ' ') || (ch >= '0' && ch <= '9') || (ch >= 'A' && ch <= 'Z');
   }
 
@@ -424,7 +451,7 @@ public final class HighLevelEncoder {
         || (ch == '>');
   }
 
-  private static boolean isNativeEDIFACT(char ch) {
+  static boolean isNativeEDIFACT(char ch) {
     return ch >= ' ' && ch <= '^';
   }
 
