@@ -18,7 +18,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>zxingorg</artifactId>
-  <version>3.5.2-SNAPSHOT</version>
+  <version>3.5.3-SNAPSHOT</version>
   <packaging>war</packaging>
 
   <dependencies>
@@ -39,7 +39,7 @@
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>32.0.1-android</version>
+      <version>32.1.2-android</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -63,11 +63,11 @@
   <parent>
     <groupId>com.google.zxing</groupId>
     <artifactId>zxing-parent</artifactId>
-    <version>3.5.2-SNAPSHOT</version>
+    <version>3.5.3-SNAPSHOT</version>
   </parent>
 
   <properties>
-    <spring.version>6.0.10</spring.version>
+    <spring.version>6.0.11</spring.version>
   </properties>
 
   <build>
