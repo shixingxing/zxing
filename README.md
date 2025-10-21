@@ -35,7 +35,7 @@ library implemented in Java, with ports to other languages.
 | ------------------- | -----------
 | core                | The core image decoding library, and test code
 | javase              | JavaSE-specific client code
-| android             | Android client Barcode Scanner [<img height='62' width='161' src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png'/>](https://play.google.com/store/apps/details?id=com.google.zxing.client.android)
+| android             | Android client Barcode Scanner 
 | android-integration | Supports integration with Barcode Scanner via `Intent`
 | android-core        | Android-related code shared among `android`, other Android apps
 | zxingorg            | The source behind `zxing.org`
@@ -55,6 +55,7 @@ library implemented in Java, with ports to other languages.
 
 | Module                                                                                    | Description
 | ----------------------------------------------------------------------------------------- | -----------
+| [Barcode-Lib4J](https://github.com/vws-java/Barcode-Lib4J)                                | Java library for printing and exporting 1D/2D barcodes to vector/raster image formats (CMYK+RGB), high precision, DPI awareness, and GS1 validation.
 | [SCodes](https://github.com/scytheStudio/SCodes)                                          | Qt & Qml wrapper
 | [QZXing](https://github.com/ftylitak/qzxing)                                              | port to Qt framework
 | [glassechidna/zxing-cpp](https://github.com/glassechidna/zxing-cpp)                       | port to C++ (forked from the [deprecated official C++ port](https://github.com/zxing/zxing/tree/00f634024ceeee591f54e6984ea7dd666fab22ae/cpp))
